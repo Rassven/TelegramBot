@@ -1,18 +1,21 @@
 import telebot
-from tbot_config import ru_c_base, ru_c_ends, ru_greeting_mess, ru_help_mess
+from tbot_config import ru_c_dict, ru_greeting_mess, ru_help_mess
 from tbot_token import TOKEN
 from tbot_app import InputException, Converter
 bot = telebot.TeleBot(TOKEN)
 
 greet_flag = False
-base = '' #русские базовые
-amount = '' #текст
-target = '' #русские базовые
+
 
 
 @bot.message_handler(commands=['start'])
 def start(message: telebot.types.Message):
-    text = ru_greeting_mess[0] + '\n' + ru_help_mess
+    global greet_flag
+    if greet_flag:
+        text = ru_greeting_mess[1]
+    else:
+        text = ru_greeting_mess[0] + '\n' + ru_help_mess
+        greet_flag = true
     bot.reply_to(message, text)
 
 
@@ -25,24 +28,24 @@ def help(message: telebot.types.Message):
 @bot.message_handler(commands=['available'])
 def available(message: telebot.types.Message):
     text = ''  #'Доступные валюты:'
-    for i in range(len(ru_c_base)):
-        text = '\n'.join((text, ru_c_base[i]+ru_c_ends[i][0]))
+    for key in ru_c_dict::
+        text = '\n'.join(key[0].upper() + key[1:] + ru_c_dict[key][1])
     bot.reply_to(message, text)
 
 
 @bot.message_handler(commands=['mem'])
 def mem(message: telebot.types.Message):
-    pars = base + amount + target
-    result = Converter.convert(pars)
-    text = f'Цена {base} {amount} в {target} = {result}'
+    pars = ''
+    text = Converter.convert(pars)
     bot.send_message(message.chat.id, text)
+    
 
 
 @bot.message_handler(content_types=['text'])
 def convert(message: telebot.types.Message):
-    pars = message.text
-    result = Converter.convert(pars)
-    text = f'Цена {base} {amount} в {target} = {result}'
+    temp = message.text + ' '
+    pars = temp.lower()
+    text = Converter.convert(pars)
     bot.send_message(message.chat.id, text)
 
 
